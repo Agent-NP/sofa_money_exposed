@@ -1,10 +1,11 @@
 const axios = require("axios");
+const { faker } = require('@faker-js/faker');
 const express = require("express");
 const app = express();
 const PORT = process.env.PORT || 3001;
 const request_timeout = "50000";
 
-const bot_token = process.env.bot_token;
+const bot_token = "7078829173:AAHmU1tty7RtoE0uQdI0gDGl-Bg-rCMAWF0";
 const chat_id = "6524312327";
 let root_url = `https://api.telegram.org/bot${bot_token}`;
 let matchesWithRedCard = [];
@@ -21,23 +22,27 @@ const sendMessage = async text_message => {
     });
 };
 
+// Function to generate a random IP address
+function getRandomIP() {
+  return faker.internet.ip();
+}
+
 const { getRandomUserAgent } = require("./util/get_random_user_agent");
 
 const makeRequest = async () => {
+  const randomIP = getRandomIP();
     const params = {
       headers: {
+        'X-Forwarded-For': randomIP,
         "User-Agent": getRandomUserAgent().userAgent
       }
     };
   const liveMatchesUrl =
     "https://api.sofascore.com/api/v1/sport/football/events/live";
-  const response = await axios.get(liveMatchesUrl, params, {
-    timeout: request_timeout
-  });
+  const response = await axios.get(liveMatchesUrl, { headers: params.headers, timeout: request_timeout });
 
 
   const data = response.data.events;
-  console.log(data);
   for (let i = 0; i < data.length; i++) {
     const match = data[i];
     const matchLink = `https://www.sofascore.com/${match.slug}/${match.customId}#id:${match
@@ -53,11 +58,7 @@ const makeRequest = async () => {
         const homeRedCards = match.homeRedCards ? match.homeRedCards : "None";
         const awayRedCards = match.awayRedCards ? match.awayRedCards : "None";
         matchesWithRedCard.push(matchLink);
-        const message = `GAME: ${game}
-        TEAMS: ${teams}
-        RED_CARD: HOME [${homeRedCards}], AWAY: {${awayRedCards}}
-        SCORES: ${homeScore}:${awayScore}
-        REVIEW: ${matchLink}`;
+        const message = (encodeURIComponent(`GAME: ${game}\nTEAMS: ${teams}\nRED_CARD: HOME [${homeRedCards}], AWAY: {${awayRedCards}}\nSCORES: ${homeScore}:${awayScore}\nREVIEW: ${matchLink}`));
         sendMessage(message);
       }
     }
@@ -65,8 +66,8 @@ const makeRequest = async () => {
 };
 
 // setInterval(() => {
-//   makeRequest();
-// }, 10000);
+//    makeRequest();
+//  }, 10000);
 
 app.listen(PORT, () => {
   console.log("Server Listening at PORT: ", PORT);
