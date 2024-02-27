@@ -51,9 +51,9 @@ const makeRequest = async () => {
   }
 };
 
-// setInterval(() => {
-//   makeRequest();
-// }, 10000);
+setInterval(() => {
+  makeRequest();
+}, 10000);
 
 app.listen(PORT, () => {
   console.log("Server Listening at PORT: ", PORT);
