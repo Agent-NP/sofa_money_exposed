@@ -2,6 +2,7 @@ const axios = require("axios");
 const express = require("express");
 const app = express();
 const PORT = process.env.PORT || 3001;
+const request_timeout = "50000";
 
 const bot_token = process.env.bot_token;
 const chat_id = "6524312327";
@@ -20,10 +21,21 @@ const sendMessage = async text_message => {
     });
 };
 
+const { getRandomUserAgent } = require("./util/get_random_user_agent");
+
 const makeRequest = async () => {
+    const params = {
+      headers: {
+        "User-Agent": getRandomUserAgent().userAgent
+      }
+    };
   const liveMatchesUrl =
     "https://api.sofascore.com/api/v1/sport/football/events/live";
-  const response = await axios.get(liveMatchesUrl);
+  const response = await axios.get(liveMatchesUrl, params, {
+    timeout: request_timeout
+  });
+
+
   const data = response.data;
   for (let i = 0; i < data.length; i++) {
     const match = data[i];
@@ -63,4 +75,3 @@ app.listen(PORT, () => {
 //Get Match current score
 //Get Which team got the red card
 //Get the time of the red card
-
