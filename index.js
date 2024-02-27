@@ -3,7 +3,7 @@ const express = require("express");
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-const bot_token = "7078829173:AAHmU1tty7RtoE0uQdI0gDGl-Bg-rCMAWF0";
+const bot_token = process.env.bot_token;
 const chat_id = "6524312327";
 let root_url = `https://api.telegram.org/bot${bot_token}`;
 let matchesWithRedCard = [];
